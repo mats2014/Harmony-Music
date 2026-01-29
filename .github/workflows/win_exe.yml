@@ -84,4 +84,4 @@ jobs:
         with:
           name: Harmony music windows exe
           path: "${{ github.workspace }}/dist/**/*.exe"
-Disable Sign executable step
+
