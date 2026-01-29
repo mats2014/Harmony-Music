@@ -1,17 +1,19 @@
-name: Build Windows exe 
-on: workflow_dispatch
-  
-jobs:
+name: Build Windows exe
 
+on:
+  workflow_dispatch:
+
+jobs:
   build-windows-exe:
     runs-on: windows-latest
     
     steps:
       - uses: actions/checkout@v3
+
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-          flutter-version: '3.24.2'
+          channel: stable
+          flutter-version: 3.24.2
       
       - name: Install InnoSetup if missing
         run: |
@@ -42,11 +44,11 @@ jobs:
           $lastSubDir = Get-ChildItem -Path "${{ github.workspace }}/dist" -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
           $exeFile = Get-ChildItem -Path "$($lastSubDir.FullName)/*.exe" | Select-Object -First 1
           if ($exeFile) {
-              echo "Found .exe file: $($exeFile.FullName)"
-              echo "::set-output name=exe_path::$($exeFile.FullName)"
+            echo "Found .exe file: $($exeFile.FullName)"
+            echo "exe_path=$($exeFile.FullName)" >> $env:GITHUB_OUTPUT
           } else {
-              Write-Error "No .exe files found in the dist directory."
-              exit 1
+            Write-Error "No .exe files found in the dist directory."
+            exit 1
           }
           
       - name: Set up osslsigncode
@@ -66,18 +68,18 @@ jobs:
           cp "${{ github.workspace }}/win_cert/DigiCertGlobalRootCA.crt" .
           cp "${{ github.workspace }}/win_cert/cert.pem" .
 
-     #  - name: Sign executable
-     #    working-directory: "${{ github.workspace }}/signed"
-     #   run: |
-     #     $exePath = "${{ steps.find_exe.outputs.exe_path }}"
-     #      $signedExePath = "$exePath".Replace(".exe", "_signed.exe")
-     #      & "${{ github.workspace }}/osslsigncode/bin/osslsigncode.exe" sign -certs cert.pem -key key.pem -t http://timestamp.digicert.com -in "$exePath" -out "$signedExePath"
+      # - name: Sign executable
+      #   working-directory: "${{ github.workspace }}/signed"
+      #   run: |
+      #     $exePath = "${{ steps.find_exe.outputs.exe_path }}"
+      #     $signedExePath = "$exePath".Replace(".exe", "_signed.exe")
+      #     & "${{ github.workspace }}/osslsigncode/bin/osslsigncode.exe" sign -certs cert.pem -key key.pem -t http://timestamp.digicert.com -in "$exePath" -out "$signedExePath"
 
-     # - name: Verify signature
-     #  working-directory: "${{ github.workspace }}/signed"
-     #  run: |
-     #    $signedExePath = "${{ steps.find_exe.outputs.exe_path }}".Replace(".exe", "_signed.exe")
-     #   & "${{ github.workspace }}/osslsigncode/bin/osslsigncode.exe" verify -in "$signedExePath" -TSA-CAfile DigiCertGlobalRootCA.crt -CAfile cert.pem
+      # - name: Verify signature
+      #   working-directory: "${{ github.workspace }}/signed"
+      #   run: |
+      #     $signedExePath = "${{ steps.find_exe.outputs.exe_path }}".Replace(".exe", "_signed.exe")
+      #     & "${{ github.workspace }}/osslsigncode/bin/osslsigncode.exe" verify -in "$signedExePath" -TSA-CAfile DigiCertGlobalRootCA.crt -CAfile cert.pem
           
       - name: Upload Windows exe artifact
         uses: actions/upload-artifact@v4
