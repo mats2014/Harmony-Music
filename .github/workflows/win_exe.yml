@@ -84,4 +84,3 @@ jobs:
         with:
           name: Harmony music windows exe
           path: "${{ github.workspace }}/dist/**/*.exe"
-
